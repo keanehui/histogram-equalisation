@@ -42,7 +42,7 @@ function App() {
       b: [], 
       G: []
     }
-  })
+  });
 
   return (
     <div className="App" style={{"width": "100%"}}>
@@ -50,7 +50,10 @@ function App() {
       <Input data={data} setData={setData} />
       <Process data={data} setData={setData} />
       <Download data={data} setData={setData} />
-      <DataVisual />
+      { data.outImg && 
+        <DataVisual data={data} />
+      }
+      <div style={{"width": "100%", "height": "200px"}}></div>
     </div>
   );
 
