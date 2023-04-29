@@ -18,15 +18,42 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
     function applyHistogramEqualization(imageData, mode) {
         if (mode === "grayscale") {
             // TODO: Implementation for grayscale histogram
-            for (let i = 0; i < imageData.data.length; i+=4) {
-                imageData.data[i] = 0;
-                imageData.data[i+1] = 0;
-                imageData.data[i+2] = 0;
+            // for (let i = 0; i < imageData.data.length; i+=4) {
+            //     imageData.data[i] = 0;
+            //     imageData.data[i+1] = 0;
+            //     imageData.data[i+2] = 0;
+            // }
+
+            let grayHistogram = new Array(256).fill(0);
+
+            for(let i = 0; i < imageData.data.length; i+=4){
+                let val = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2])/3;  // simple average is used
+                ++grayHistogram[val];
             }
 
+            // Build grayscale CDF
+            let grayCDF = new Arrry(256).fill(0);
+            grayCDF[0] = grayHistogram[0];
+            for(let i = 1; i < 256; ++i){
+                grayCDF[i] = grayCDF[i-1] + grayHistogram[i];
+            }
 
+            // normalize the cdf
+            const normalizedCdf = grayCDF.map((value) => value / (imageData.data.length/4));
 
-            // arbitary commnet 
+            let mapping = new Array(256).fill(0);
+            for(let i = 0;  i < 256; ++i){
+                mapping = Math.round(255 * normalizedCdf[i]);
+            }
+
+            // map image value 
+            for(let i = 0; i < imageData.data.length; i+=4){
+                let val = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2])/3;  // simple average is used
+
+                imageData.data[i] = 
+                imageData.data[i + 1] = 
+                imageData.data[i + 2] = mapping[val];
+            }
 
             
         } else {
