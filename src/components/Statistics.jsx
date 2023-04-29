@@ -1,16 +1,16 @@
 
 import "../styles/Statistics.css"
 
-function Statistics(props) {
+function Statistics({data, phase}) {
     return (
         <div className="stats">
             <h1>Statistics</h1>
             <div style={{"height": "300px", "display": "flex", "flexDirection": "column", "justifyContent": "space-around"}}>
-                <div>width: {props.dimensions.w} px</div>
-                <div>height: {props.dimensions.h} px</div>
-                <div>average intensity: {props.avgIntensity}</div>
-                <div>entropy: {props.entropy}</div>
-                <div>time delta: {props.delta} ms</div>
+                <div>width: {data.w} px</div>
+                <div>height: {data.h} px</div>
+                <div>average intensity: {(phase==="before")?data.avgIntensity:data.avgIntensityF}</div>
+                <div>entropy: {(phase==="before")?data.entropy:data.entropyF}</div>
+                <div>time delta: {(phase==="before")?0:data.delta} ms</div>
             </div>
         </div>
     );
@@ -26,9 +26,9 @@ export const calculateAvgIntensity = (imageData) => {
         const intensity = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
         totalIntensity += intensity;
     }
-    const averageIntensity = totalIntensity / (imageData.data.length / 4);
+    const avgIntensity = totalIntensity / (imageData.data.length / 4);
 
-    return averageIntensity;
+    return avgIntensity;
 }
 
 export const calculateEntropy = (imageData) => {

@@ -6,45 +6,25 @@ import Download from "./components/Download";
 import { useState } from "react";
 
 function App() {
-  const [dimensions, setDimensions] = useState({w: 0, h: 0});
-  const [avgIntensity, setAvgIntensity] = useState(0);
-  const [avgIntensityF, setAvgIntensityF] = useState(0);
-  const [entropy, setEntropy] = useState(0);
-  const [entropyF, setEntropyF] = useState(0);
-  const [delta, setDelta] = useState(Date.now());
 
-  const [img, setImg] = useState("");
-  const [outImg, setOutImg] = useState("");
+  const [data, setData] = useState({
+    img: "",
+    outImg: "",
+    w: 0,
+    h: 0,
+    avgIntensity: 0,
+    avgIntensityF: 0,
+    entropy: 0,
+    entropyF: 0,
+    delta: 0,
+  })
 
   return (
     <div className="App" style={{"width": "100%"}}>
       <Title />
-      <Input 
-        img={img} 
-        dimensions={dimensions}
-        avgIntensity={avgIntensity}
-        entropy={entropy}
-        delta={0}
-        setDimensions={setDimensions} 
-        setAvgIntensity={setAvgIntensity}
-        setEntropy={setEntropy}
-        setImg={setImg} 
-      />
-      <Process 
-        dimensions={dimensions} 
-        img={img} 
-        setOutImg={setOutImg}  
-        setAvgIntensityF={setAvgIntensityF} 
-        setEntropyF={setEntropyF} 
-        setDelta={setDelta}
-      />
-      <Download 
-        outImg={outImg} 
-        dimensions={dimensions}
-        avgIntensityF={avgIntensityF}
-        entropyF={entropyF}
-        delta={delta}
-      />
+      <Input data={data} setData={setData} />
+      <Process data={data} setData={setData} />
+      <Download data={data} setData={setData} />
     </div>
   );
 

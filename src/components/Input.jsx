@@ -2,7 +2,7 @@ import "../styles/Input.css"
 import Statistics from "./Statistics";
 import { calculateAvgIntensity, calculateEntropy } from "./Statistics";
 
-function Input({img, dimensions, avgIntensity, entropy, delta, setDimensions, setAvgIntensity, setEntropy, setImg}) {
+function Input({data, setData}) {
 
     const handleUpload = () => {
         const input = document.getElementById("image-input");
@@ -14,9 +14,12 @@ function Input({img, dimensions, avgIntensity, entropy, delta, setDimensions, se
             
             let img = new Image();
             img.onload = function() {
-                setDimensions({
-                    w: this.width,
-                    h: this.height
+                setData((prev) => {
+                    return {
+                        ...prev,
+                        w: this.width,
+                        h: this.height
+                    };
                 });
                 console.log("dimensions set, w h", this.width, this.height);
 
@@ -28,14 +31,24 @@ function Input({img, dimensions, avgIntensity, entropy, delta, setDimensions, se
                 ctx.drawImage(img, 0, 0);
                 let imageData = ctx.getImageData(0, 0, this.width, this.height);
                 let avgIntensity = calculateAvgIntensity(imageData);
-                setAvgIntensity(avgIntensity);
                 let entropy = calculateEntropy(imageData);
-                setEntropy(entropy);
+                setData((prev) => {
+                    return {
+                        ...prev,
+                        avgIntensity: avgIntensity,
+                        entropy: entropy
+                    };
+                })
                 console.log("statistics before", "avgIntensity", avgIntensity, "entropy", entropy);
 
             };
             img.src = reader.result;
-            setImg(reader.result);
+            setData((prev) => {
+                return {
+                    ...prev,
+                    img: reader.result
+                };
+            });
             console.log("img set", reader.result);
 
         });
@@ -47,17 +60,12 @@ function Input({img, dimensions, avgIntensity, entropy, delta, setDimensions, se
             <input type="file" accept=".jpg, .jpeg, .png" name="" id="image-input" onChange={handleUpload} style={{"paddingLeft": "10px"}}/>
             <div className="flex-container">
                 <div className="input-image-display">
-                    { img !== "" && 
-                        <img src={img} alt="" />
+                    { data.img !== "" && 
+                        <img src={data.img} alt="" />
                     }
                 </div>
-                { img !== "" && 
-                    <Statistics 
-                        dimensions={dimensions} 
-                        avgIntensity={avgIntensity} 
-                        entropy={entropy} 
-                        delta={delta}
-                    />
+                { data.img !== "" && 
+                    <Statistics data={data} phase="before" />
                 }
             </div>
             

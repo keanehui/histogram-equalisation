@@ -2,7 +2,7 @@
 import "../styles/Process.css"
 import { calculateAvgIntensity, calculateEntropy } from "./Statistics";
 
-function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, setDelta}) {
+function Process({data, setData}) {
     return (
         <div style={{"width": "100%"}}>
             <h2 className="text-center">Step 2 - Process</h2>
@@ -30,7 +30,6 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
 
             
         } else {
-            // Build histograms
             let histograms = {
                 r: new Array(256).fill(0),
                 g: new Array(256).fill(0),
@@ -42,7 +41,6 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
                 histograms.b[imageData.data[i]]++;
             }
 
-            // Build CDF
             const mappingFunctions = {
                 r: [],
                 g: [],
@@ -79,12 +77,12 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
         let endTime = startTime;
         let mode = document.getElementById("modes").value;
         console.log("Process mode", mode);
-        if (!img) {
+        if (!data.img) {
             alert("Upload an image to process!");
             return;
         }
-        let w = dimensions.w;
-        let h = dimensions.h;
+        let w = data.w;
+        let h = data.h;
         let canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
@@ -99,22 +97,24 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
 
             // Calculating statistics
             let avgIntensity = calculateAvgIntensity(imageData);
-            setAvgIntensityF(avgIntensity);
             let entropy = calculateEntropy(imageData);
-            setEntropyF(entropy);
-            console.log("statistics after", "avgIntensity", avgIntensity, "entropy", entropy);
-
             ctx.putImageData(imageData, 0, 0);
             let dataURL = canvas.toDataURL();
-            setOutImg(dataURL);
-            console.log("outImg set", dataURL);
-
             endTime = Date.now();
             let delta = endTime - startTime;
-            setDelta(delta);
-            console.log("delta", delta);
+
+            setData((prev) => {
+                return {
+                    ...prev,
+                    avgIntensityF: avgIntensity,
+                    entropyF: entropy,
+                    outImg: dataURL,
+                    delta: delta
+                };
+            });
+            console.log("statistics after", "avgIntensity", avgIntensity, "entropy", entropy, "delta", delta);
         }
-        image.src = img;
+        image.src = data.img;
     }
 
 }
