@@ -1,0 +1,10 @@
+
+.output-image-display {
+    flex-grow: 1;
+    text-align: center;
+    margin: auto;
+}
+
+.save-btn {
+    margin-left: 10px;
+}

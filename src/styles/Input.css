@@ -1,0 +1,19 @@
+
+.input-image-display {
+    flex-grow: 1;
+    text-align: center;
+    margin: auto;
+}
+
+.flex-container {
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+
+.input-canvas {
+    width: 100%;
+    height: 100%;
+}
