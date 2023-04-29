@@ -58,7 +58,7 @@ function Input({data, setData}) {
             <div className="flex-container">
                 <div className="input-image-display">
                     { data.img !== "" && 
-                        <img src={data.img} alt="" />
+                        <img src={data.img} alt="" style={{"maxWidth": "1000px"}} />
                     }
                 </div>
                 { data.img !== "" && 

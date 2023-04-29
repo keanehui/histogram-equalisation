@@ -11,7 +11,7 @@ function Download({data, setData}) {
             <div className="flex-container">
                 <div className="output-image-display">
                     { data.outImg !== "" && 
-                        <img src={data.outImg} alt="" />
+                        <img src={data.outImg} style={{"maxWidth": "1000px"}} alt="" />
                     }
                 </div>
                 { data.outImg !== "" && 
