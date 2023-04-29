@@ -2,17 +2,38 @@
 import "../styles/Process.css"
 import { calculateAvgIntensity, calculateEntropy } from "./Statistics";
 import { getVisualData } from "./Input";
+import { useState } from "react";
 
 function Process({data, setData}) {
+
+    const [ignoreRange, setIgnoreRange] = useState(0);
+
+    const handleIgnoreRangeChange = (event) => {
+        setIgnoreRange(parseInt(event.target.value));
+    };
+
     return (
         <div style={{"width": "100%"}}>
             <h2 className="text-center">Step 2 - Process</h2>
-            <label style={{"marginLeft": "10px"}} htmlFor="modes">Mode: </label>
-            <select name="modes" id="modes" defaultValue="grayscale">
-                <option value="grayscale">Grayscale</option>
-                <option value="individual">Individual</option>
-            </select>
-            <button type="button" className="process-btn" onClick={handleProcess}>Start Processing</button>  
+
+                <div style={{"width": "100%", "display": "flex", "flexDirection": "row", "alignItems": "center"}}>
+                    <label style={{"marginLeft": "10px"}} htmlFor="modes">Mode: </label>
+                    <select name="modes" id="modes" defaultValue="grayscale">
+                        <option value="grayscale">Grayscale</option>
+                        <option value="individual">Individual</option>
+                    </select>
+
+                    <div style={{"width": "200px", "display": "flex", "flexDirection": "column", "marginLeft": "50px"}}>
+                        <label htmlFor="ignore-range">Ignore Range: {ignoreRange}</label>
+                        <input type="range" min="0" max="127" defaultValue="0" id="ignore-range" onChange={handleIgnoreRangeChange} />
+                    </div>
+                    
+                    <button type="button" style={{"marginLeft": "50px", "height": "18px"}} onClick={handleProcess}>Start Processing</button>  
+
+                </div>
+
+                
+            
         </div>
     );
 
@@ -31,6 +52,9 @@ function Process({data, setData}) {
 
             
         } else {
+            let lowerBound = ignoreRange;
+            let upperBound = 255-ignoreRange;
+
 
             let histograms = {
                 r: new Array(256).fill(0),
@@ -38,9 +62,23 @@ function Process({data, setData}) {
                 b: new Array(256).fill(0)
             };
             for (let i = 0; i < imageData.data.length; i+=4) {
-                histograms.r[imageData.data[i]]++;
-                histograms.g[imageData.data[i]]++;
-                histograms.b[imageData.data[i]]++;
+                let r = imageData.data[i];
+                let g = imageData.data[i+1];
+                let b = imageData.data[i+2];
+
+                if (r < lowerBound || 
+                    r > upperBound || 
+                    g < lowerBound || 
+                    g > upperBound ||
+                    b < lowerBound ||
+                    b > upperBound
+                ) {
+                    continue;
+                }
+
+                histograms.r[r]++;
+                histograms.g[g]++;
+                histograms.b[b]++;
             }
 
             const mappingFunctions = {
@@ -67,6 +105,15 @@ function Process({data, setData}) {
                 const rValue = imageData.data[i];
                 const gValue = imageData.data[i+1];
                 const bValue = imageData.data[i+2];
+                if (rValue < lowerBound || 
+                    rValue > upperBound || 
+                    gValue < lowerBound || 
+                    gValue > upperBound ||
+                    bValue < lowerBound ||
+                    bValue > upperBound
+                ) {
+                    continue;
+                }
                 imageData.data[i] = mappingFunctions.r[rValue];
                 imageData.data[i+1] = mappingFunctions.g[gValue];
                 imageData.data[i+2] = mappingFunctions.b[bValue];
