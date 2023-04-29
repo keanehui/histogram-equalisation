@@ -26,7 +26,7 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
 
 
 
-
+            // arbitary commnet 
 
             
         } else {
