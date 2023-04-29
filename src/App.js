@@ -1,9 +1,10 @@
 
 import "./App.css"
+import { useState } from "react";
 import Input from "./components/Input";
 import Process from "./components/Process";
 import Download from "./components/Download";
-import { useState } from "react";
+import DataVisual from "./components/DataVisual";
 
 function App() {
 
@@ -17,6 +18,30 @@ function App() {
     entropy: 0,
     entropyF: 0,
     delta: 0,
+    histograms: {
+      r: [],
+      g: [],
+      b: [],
+      G: []
+    },
+    histogramsF: {
+      r: [],
+      g: [],
+      b: [],
+      G: []
+    },
+    cdfs: {
+      r: [],
+      g: [],
+      b: [], 
+      G: []
+    },
+    cdfsF: {
+      r: [],
+      g: [],
+      b: [], 
+      G: []
+    }
   })
 
   return (
@@ -25,6 +50,7 @@ function App() {
       <Input data={data} setData={setData} />
       <Process data={data} setData={setData} />
       <Download data={data} setData={setData} />
+      <DataVisual />
     </div>
   );
 

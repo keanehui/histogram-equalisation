@@ -14,15 +14,6 @@ function Input({data, setData}) {
             
             let img = new Image();
             img.onload = function() {
-                setData((prev) => {
-                    return {
-                        ...prev,
-                        w: this.width,
-                        h: this.height
-                    };
-                });
-                console.log("dimensions set, w h", this.width, this.height);
-
                 // Calculating statistics
                 let canvas = document.createElement("canvas");
                 canvas.width = this.width;
@@ -32,15 +23,21 @@ function Input({data, setData}) {
                 let imageData = ctx.getImageData(0, 0, this.width, this.height);
                 let avgIntensity = calculateAvgIntensity(imageData);
                 let entropy = calculateEntropy(imageData);
+                let visualData = getVisualData(imageData);
                 setData((prev) => {
                     return {
                         ...prev,
+                        w: this.width,
+                        h: this.height,
                         avgIntensity: avgIntensity,
-                        entropy: entropy
+                        entropy: entropy,
+                        histograms: visualData.histograms,
+                        cdfs: visualData.cdfs
                     };
                 })
+                console.log("dimensions set, w h", this.width, this.height);
                 console.log("statistics before", "avgIntensity", avgIntensity, "entropy", entropy);
-
+                console.log("visual data set", visualData);
             };
             img.src = reader.result;
             setData((prev) => {
@@ -75,6 +72,43 @@ function Input({data, setData}) {
 
 export default Input;
 
+export function getVisualData(imageData) {
+    let result = {
+        histograms: {
+            r: new Array(256).fill(0),
+            g: new Array(256).fill(0),
+            b: new Array(256).fill(0),
+            G: new Array(256).fill(0)
+        },
+        cdfs: {
+            r: new Array(256).fill(0),
+            g: new Array(256).fill(0),
+            b: new Array(256).fill(0), 
+            G: new Array(256).fill(0)
+          }
+    }
+
+    for (let i = 0; i < imageData.data.length; i+=4) {
+        let r = imageData.data[i];
+        let g = imageData.data[i+1];
+        let b = imageData.data[i+2];
+        let G = Math.round((r+g+b)/3);
+        result.histograms.r[r]++;
+        result.histograms.g[g]++;
+        result.histograms.b[b]++;
+        result.histograms.G[G]++;
+    }
+
+    for (const [c, histogram] of Object.entries(result.histograms)) {
+        result.cdfs[c][0] = histogram[0];
+        for (let i = 1; i < 256; ++i) {
+            result.cdfs[c][i] = result.cdfs[c][i-1] + histogram[i];
+        }
+        result.cdfs[c] = result.cdfs[c].map((value) => value / (imageData.data.length/4));
+    }
+
+    return result;
+}
 
 
 

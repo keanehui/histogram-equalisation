@@ -1,6 +1,7 @@
 
 import "../styles/Process.css"
 import { calculateAvgIntensity, calculateEntropy } from "./Statistics";
+import { getVisualData } from "./Input";
 
 function Process({data, setData}) {
     return (
@@ -30,6 +31,7 @@ function Process({data, setData}) {
 
             
         } else {
+
             let histograms = {
                 r: new Array(256).fill(0),
                 g: new Array(256).fill(0),
@@ -74,7 +76,6 @@ function Process({data, setData}) {
 
     function handleProcess() {
         let startTime = Date.now();
-        let endTime = startTime;
         let mode = document.getElementById("modes").value;
         console.log("Process mode", mode);
         if (!data.img) {
@@ -94,25 +95,27 @@ function Process({data, setData}) {
             let imageData = ctx.getImageData(0, 0, w, h);
             
             applyHistogramEqualization(imageData, mode);
+            
 
             // Calculating statistics
             let avgIntensity = calculateAvgIntensity(imageData);
             let entropy = calculateEntropy(imageData);
             ctx.putImageData(imageData, 0, 0);
             let dataURL = canvas.toDataURL();
-            endTime = Date.now();
-            let delta = endTime - startTime;
-
+            let visualData = getVisualData(imageData);
+            console.log("visual data F", visualData);
             setData((prev) => {
                 return {
                     ...prev,
                     avgIntensityF: avgIntensity,
                     entropyF: entropy,
                     outImg: dataURL,
-                    delta: delta
+                    delta: Date.now() - startTime,
+                    histogramsF: visualData.histograms,
+                    cdfsF: visualData.cdfs
                 };
             });
-            console.log("statistics after", "avgIntensity", avgIntensity, "entropy", entropy, "delta", delta);
+            console.log("statistics after", "avgIntensity", avgIntensity, "entropy", entropy);
         }
         image.src = data.img;
     }
