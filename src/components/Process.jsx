@@ -40,21 +40,32 @@ function Process({data, setData}) {
     function applyHistogramEqualization(imageData, mode) {
         if (mode === "grayscale") {
             // TODO: Implementation for grayscale histogram
-            // for (let i = 0; i < imageData.data.length; i+=4) {
-            //     imageData.data[i] = 0;
-            //     imageData.data[i+1] = 0;
-            //     imageData.data[i+2] = 0;
-            // }
+            let lowerBound = ignoreRange;
+            let upperBound = 255 - ignoreRange;
 
             let grayHistogram = new Array(256).fill(0);
 
             for(let i = 0; i < imageData.data.length; i+=4){
-                let val = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2])/3;  // simple average is used
+                let r = imageData.data[i];
+                let g = imageData.data[i+1];
+                let b = imageData.data[i+2];
+
+                if (r < lowerBound || 
+                    r > upperBound || 
+                    g < lowerBound || 
+                    g > upperBound ||
+                    b < lowerBound ||
+                    b > upperBound
+                ) {
+                    continue;
+                }
+
+                let val = (r + g + b)/3;
                 ++grayHistogram[val];
             }
 
             // Build grayscale CDF
-            let grayCDF = new Arrry(256).fill(0);
+            let grayCDF = new Array(256).fill(0);
             grayCDF[0] = grayHistogram[0];
             for(let i = 1; i < 256; ++i){
                 grayCDF[i] = grayCDF[i-1] + grayHistogram[i];
@@ -65,16 +76,28 @@ function Process({data, setData}) {
 
             let mapping = new Array(256).fill(0);
             for(let i = 0;  i < 256; ++i){
-                mapping = Math.round(255 * normalizedCdf[i]);
+                mapping[i] = Math.round(255 * normalizedCdf[i]);
             }
 
             // map image value 
             for(let i = 0; i < imageData.data.length; i+=4){
-                let val = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2])/3;  // simple average is used
+                const rValue = imageData.data[i];
+                const gValue = imageData.data[i+1];
+                const bValue = imageData.data[i+2];
 
-                imageData.data[i] = 
-                imageData.data[i + 1] = 
-                imageData.data[i + 2] = mapping[val];
+                if (rValue < lowerBound || 
+                    rValue > upperBound || 
+                    gValue < lowerBound || 
+                    gValue > upperBound ||
+                    bValue < lowerBound ||
+                    bValue > upperBound
+                ) {
+                    continue;
+                }
+
+                imageData.data[i] = mapping[rValue];
+                imageData.data[i + 1] = mapping[gValue];
+                imageData.data[i + 2] = mapping[bValue];
             }
 
             
