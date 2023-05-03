@@ -3,36 +3,31 @@ import "../styles/Download.css"
 import Statistics from "./Statistics";
 
 
-function Download({outImg, dimensions, avgIntensityF, entropyF, delta}) {
+function Download({data, setData}) {
     return (
         <div style={{"width": "100%"}}>
             <h2 className="text-center">Step 3 - Download</h2>
             <button type="button" className="save-btn" onClick={handleSave}>Save Image</button>
             <div className="flex-container">
                 <div className="output-image-display">
-                    { outImg !== "" && 
-                        <img src={outImg} alt="" />
+                    { data.outImg !== "" && 
+                        <img src={data.outImg} style={{"maxWidth": "1000px"}} alt="" />
                     }
                 </div>
-                { outImg !== "" && 
-                    <Statistics 
-                        dimensions={dimensions} 
-                        avgIntensity={avgIntensityF} 
-                        entropy={entropyF} 
-                        delta={delta}
-                    />
+                { data.outImg !== "" && 
+                    <Statistics data={data} phase="after" />
                 }
             </div>
         </div>
     );
 
     function handleSave() {
-        if (!outImg) {
+        if (!data.outImg) {
             alert("Process an image before save!");
             return;
         }
         let a = document.createElement("a");
-        a.href = outImg;
+        a.href = data.outImg;
         a.download = "output";
         a.click();
     }

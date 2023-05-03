@@ -1,17 +1,39 @@
 
 import "../styles/Process.css"
 import { calculateAvgIntensity, calculateEntropy } from "./Statistics";
+import { getVisualData } from "./Input";
+import { useState } from "react";
 
-function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, setDelta}) {
+function Process({data, setData}) {
+
+    const [ignoreRange, setIgnoreRange] = useState(0);
+
+    const handleIgnoreRangeChange = (event) => {
+        setIgnoreRange(parseInt(event.target.value));
+    };
+
     return (
         <div style={{"width": "100%"}}>
             <h2 className="text-center">Step 2 - Process</h2>
-            <label style={{"marginLeft": "10px"}} htmlFor="modes">Mode: </label>
-            <select name="modes" id="modes" defaultValue="grayscale">
-                <option value="grayscale">Grayscale</option>
-                <option value="individual">Individual</option>
-            </select>
-            <button type="button" className="process-btn" onClick={handleProcess}>Start Processing</button>  
+
+                <div style={{"width": "100%", "display": "flex", "flexDirection": "row", "alignItems": "center"}}>
+                    <label style={{"marginLeft": "10px"}} htmlFor="modes">Mode: </label>
+                    <select name="modes" id="modes" defaultValue="grayscale">
+                        <option value="grayscale">Grayscale</option>
+                        <option value="individual">Individual</option>
+                    </select>
+
+                    <div style={{"width": "200px", "display": "flex", "flexDirection": "column", "marginLeft": "50px"}}>
+                        <label htmlFor="ignore-range">Ignore Range: {ignoreRange}</label>
+                        <input type="range" min="0" max="127" defaultValue="0" id="ignore-range" onChange={handleIgnoreRangeChange} />
+                    </div>
+                    
+                    <button type="button" style={{"marginLeft": "50px", "height": "18px"}} onClick={handleProcess}>Start Processing</button>  
+
+                </div>
+
+                
+            
         </div>
     );
 
@@ -57,19 +79,35 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
 
             
         } else {
-            // Build histograms
+            let lowerBound = ignoreRange;
+            let upperBound = 255-ignoreRange;
+
+
             let histograms = {
                 r: new Array(256).fill(0),
                 g: new Array(256).fill(0),
                 b: new Array(256).fill(0)
             };
             for (let i = 0; i < imageData.data.length; i+=4) {
-                histograms.r[imageData.data[i]]++;
-                histograms.g[imageData.data[i]]++;
-                histograms.b[imageData.data[i]]++;
+                let r = imageData.data[i];
+                let g = imageData.data[i+1];
+                let b = imageData.data[i+2];
+
+                if (r < lowerBound || 
+                    r > upperBound || 
+                    g < lowerBound || 
+                    g > upperBound ||
+                    b < lowerBound ||
+                    b > upperBound
+                ) {
+                    continue;
+                }
+
+                histograms.r[r]++;
+                histograms.g[g]++;
+                histograms.b[b]++;
             }
 
-            // Build CDF
             const mappingFunctions = {
                 r: [],
                 g: [],
@@ -94,6 +132,15 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
                 const rValue = imageData.data[i];
                 const gValue = imageData.data[i+1];
                 const bValue = imageData.data[i+2];
+                if (rValue < lowerBound || 
+                    rValue > upperBound || 
+                    gValue < lowerBound || 
+                    gValue > upperBound ||
+                    bValue < lowerBound ||
+                    bValue > upperBound
+                ) {
+                    continue;
+                }
                 imageData.data[i] = mappingFunctions.r[rValue];
                 imageData.data[i+1] = mappingFunctions.g[gValue];
                 imageData.data[i+2] = mappingFunctions.b[bValue];
@@ -103,15 +150,14 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
 
     function handleProcess() {
         let startTime = Date.now();
-        let endTime = startTime;
         let mode = document.getElementById("modes").value;
         console.log("Process mode", mode);
-        if (!img) {
+        if (!data.img) {
             alert("Upload an image to process!");
             return;
         }
-        let w = dimensions.w;
-        let h = dimensions.h;
+        let w = data.w;
+        let h = data.h;
         let canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
@@ -123,25 +169,29 @@ function Process({dimensions, img, setOutImg, setAvgIntensityF, setEntropyF, set
             let imageData = ctx.getImageData(0, 0, w, h);
             
             applyHistogramEqualization(imageData, mode);
+            
 
             // Calculating statistics
             let avgIntensity = calculateAvgIntensity(imageData);
-            setAvgIntensityF(avgIntensity);
             let entropy = calculateEntropy(imageData);
-            setEntropyF(entropy);
-            console.log("statistics after", "avgIntensity", avgIntensity, "entropy", entropy);
-
             ctx.putImageData(imageData, 0, 0);
             let dataURL = canvas.toDataURL();
-            setOutImg(dataURL);
-            console.log("outImg set", dataURL);
-
-            endTime = Date.now();
-            let delta = endTime - startTime;
-            setDelta(delta);
-            console.log("delta", delta);
+            let visualData = getVisualData(imageData);
+            console.log("visual data F", visualData);
+            setData((prev) => {
+                return {
+                    ...prev,
+                    avgIntensityF: avgIntensity,
+                    entropyF: entropy,
+                    outImg: dataURL,
+                    delta: Date.now() - startTime,
+                    histogramsF: visualData.histograms,
+                    cdfsF: visualData.cdfs
+                };
+            });
+            console.log("statistics after", "avgIntensity", avgIntensity, "entropy", entropy);
         }
-        image.src = img;
+        image.src = data.img;
     }
 
 }
