@@ -39,7 +39,6 @@ function Process({data, setData}) {
 
     function applyHistogramEqualization(imageData, mode) {
         if (mode === "grayscale") {
-            // TODO: Implementation for grayscale histogram
             let lowerBound = ignoreRange;
             let upperBound = 255 - ignoreRange;
 
@@ -60,7 +59,7 @@ function Process({data, setData}) {
                     continue;
                 }
 
-                let val = (r + g + b)/3;
+                let val = Math.round((r + g + b) / 3);
                 ++grayHistogram[val];
             }
 
@@ -101,7 +100,7 @@ function Process({data, setData}) {
             }
 
             
-        } else {
+        } else { // individual
             let lowerBound = ignoreRange;
             let upperBound = 255-ignoreRange;
 
