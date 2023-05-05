@@ -15,25 +15,20 @@ function Process({data, setData}) {
     return (
         <div style={{"width": "100%"}}>
             <h2 className="text-center">Step 2 - Process</h2>
-
-                <div style={{"width": "100%", "display": "flex", "flexDirection": "row", "alignItems": "center"}}>
-                    <label style={{"marginLeft": "10px"}} htmlFor="modes">Mode: </label>
-                    <select name="modes" id="modes" defaultValue="grayscale">
-                        <option value="grayscale">Grayscale</option>
-                        <option value="individual">Individual</option>
-                    </select>
-
-                    <div style={{"width": "200px", "display": "flex", "flexDirection": "column", "marginLeft": "50px"}}>
-                        <label htmlFor="ignore-range">Ignore Range: {ignoreRange}</label>
-                        <input type="range" min="0" max="127" defaultValue="0" id="ignore-range" onChange={handleIgnoreRangeChange} />
+                { data.img && (
+                    <div style={{"width": "100%", "display": "flex", "flexDirection": "row", "alignItems": "center"}}>
+                        <label style={{"marginLeft": "10px"}} htmlFor="modes">Mode: </label>
+                        <select name="modes" id="modes" defaultValue="grayscale">
+                            <option value="grayscale">Grayscale</option>
+                            <option value="individual">Individual</option>
+                        </select>
+                        <div style={{"width": "200px", "display": "flex", "flexDirection": "column", "marginLeft": "50px"}}>
+                            <label htmlFor="ignore-range">Ignore Range: {ignoreRange}</label>
+                            <input type="range" min="0" max="127" defaultValue="0" id="ignore-range" onChange={handleIgnoreRangeChange} />
+                        </div>
+                        <button type="button" style={{"marginLeft": "50px", "height": "18px"}} onClick={handleProcess}>Start Processing</button>  
                     </div>
-                    
-                    <button type="button" style={{"marginLeft": "50px", "height": "18px"}} onClick={handleProcess}>Start Processing</button>  
-
-                </div>
-
-                
-            
+                )}
         </div>
     );
 
